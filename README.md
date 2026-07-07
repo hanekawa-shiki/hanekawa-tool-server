@@ -27,14 +27,8 @@ echo "https://your-app.example.com" | npx wrangler secret put ALLOWED_ORIGINS
 echo "https://new-domain.example.com,https://another.com" | npx wrangler secret put ALLOWED_ORIGINS
 ```
 
-本地开发（国内需要代理访问 GitHub）:
-```bash
-./scripts/dev-with-proxy.sh
-```
 
 ## API 接口
-
-所有查询接口均为 POST 请求。
 
 ### 获取指定年份完整数据
 
@@ -45,37 +39,7 @@ Content-Type: application/json
 { "year": 2025 }
 ```
 
-返回原始 holiday-cn JSON，结构与仓库一致。
-
-### 获取指定年份假期列表
-
-```
-POST /api/holidays/days
-Content-Type: application/json
-
-{ "year": 2025 }
-```
-
-返回 `days` 数组。
-
-### 查询某天状态
-
-```
-POST /api/holidays/check
-Content-Type: application/json
-
-{ "date": "2025-10-01" }
-```
-
-响应:
-```json
-{ "date": "2025-10-01", "isHoliday": true, "isOffDay": true, "name": "国庆节、中秋节" }
-```
-
-不在节假日列表中的日期:
-```json
-{ "date": "2025-03-15", "isHoliday": false, "isOffDay": false, "name": null }
-```
+返回原始 holiday-cn JSON，结构与仓库一致（包含 `year`、`days`、`papers` 字段）。
 
 ## 项目结构
 

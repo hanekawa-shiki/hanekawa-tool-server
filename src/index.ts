@@ -1,4 +1,4 @@
-import type { Env, HolidayDay } from "./types";
+import type { Env } from "./types";
 import { syncAll } from "./sync";
 
 export default {
@@ -10,68 +10,48 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
-    // 获取请求 Origin 并校验
+    // 强制 HTTPS
+    if (url.protocol !== "https:") {
+      return json("", { error: "HTTPS required" }, 403);
+    }
+
+    // 强制校验 Origin
     const origin = request.headers.get("Origin") || "";
+    if (!origin) return json("", { error: "Origin header required" }, 403);
+
     const allowedOrigins = env.ALLOWED_ORIGINS
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const matchedOrigin = allowedOrigins.includes(origin) ? origin : "";
+    if (!allowedOrigins.includes(origin)) {
+      return json("", { error: "Origin not allowed" }, 403);
+    }
 
-    // CORS 预检：仅允许的域名通过
+    // CORS 预检
     if (method === "OPTIONS") {
-      if (!matchedOrigin) return new Response(null, { status: 403 });
-      return corsResponse(matchedOrigin, null, 204);
+      return corsResponse(origin, null, 204);
     }
 
     try {
       // GET / - 服务信息
       if (path === "/" || path === "") {
-        return json(matchedOrigin, { message: "Holiday CN API", version: "1.0.0" });
+        return json(origin, { message: "Holiday CN API", version: "1.0.0" });
       }
 
       // POST /api/holidays/year - 获取指定年份完整数据
       if (path === "/api/holidays/year" && method === "POST") {
         const body = await request.json<{ year?: number }>();
-        if (!body.year) return json(matchedOrigin, { error: "Missing 'year' field" }, 400);
+        if (!body.year) return json(origin, { error: "Missing 'year' field" }, 400);
 
         const data = await env.HOLIDAYS.get(`holiday:year:${body.year}`, "json");
-        if (!data) return json(matchedOrigin, { error: `No data for year ${body.year}` }, 404);
-        return json(matchedOrigin, data);
+        if (!data) return json(origin, { error: `No data for year ${body.year}` }, 404);
+        return json(origin, data);
       }
 
-      // POST /api/holidays/days - 获取指定年份假期列表
-      if (path === "/api/holidays/days" && method === "POST") {
-        const body = await request.json<{ year?: number }>();
-        if (!body.year) return json(matchedOrigin, { error: "Missing 'year' field" }, 400);
-
-        const data = await env.HOLIDAYS.get(`holiday:year:${body.year}`, "json") as { days?: HolidayDay[] } | null;
-        if (!data) return json(matchedOrigin, { error: `No data for year ${body.year}` }, 404);
-        return json(matchedOrigin, data.days ?? []);
-      }
-
-      // POST /api/holidays/check - 查询某天状态
-      if (path === "/api/holidays/check" && method === "POST") {
-        const body = await request.json<{ date?: string }>();
-        const date = body.date;
-        if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-          return json(matchedOrigin, { error: "Missing or invalid 'date' field (YYYY-MM-DD)" }, 400);
-        }
-
-        const year = date.substring(0, 4);
-        const data = await env.HOLIDAYS.get(`holiday:year:${year}`, "json") as { days?: HolidayDay[] } | null;
-        if (!data) return json(matchedOrigin, { error: `No data for year ${year}` }, 404);
-
-        const day = data.days?.find((d: HolidayDay) => d.date === date);
-        if (!day) return json(matchedOrigin, { date, isHoliday: false, isOffDay: false, name: null });
-
-        return json(matchedOrigin, { date, isHoliday: true, isOffDay: day.isOffDay, name: day.name });
-      }
-
-      return json(matchedOrigin, { error: "Not Found" }, 404);
+      return json(origin, { error: "Not Found" }, 404);
     } catch (err) {
       console.error("Request error:", err);
-      return json(matchedOrigin, { error: err instanceof Error ? err.message : "Internal Error" }, 500);
+      return json(origin, { error: err instanceof Error ? err.message : "Internal Error" }, 500);
     }
   },
 
