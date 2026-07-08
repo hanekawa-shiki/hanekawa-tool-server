@@ -28,7 +28,7 @@ export default {
 
     try {
       if (path === "/" || path === "") {
-        return json(origin, { message: "Holiday CN API", version: "1.0.0" });
+        return json(origin, { message: "HANEKAWA-TOOLS API", version: "1.0.0" });
       }
 
       if (path === "/api/holidays/year" && method === "POST") {
@@ -36,7 +36,7 @@ export default {
         if (!body.year) return json(origin, { error: "Missing 'year' field" }, 400);
 
         const data = await env.HOLIDAYS.get(`holiday:year:${body.year}`, "json");
-        if (!data) return json(origin, { error: `No data for year ${body.year}` }, 404);
+        if (!data) return json(origin, { days: [] });
         return json(origin, data);
       }
 
