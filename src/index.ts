@@ -45,39 +45,31 @@ export default {
       // ========== 成品油油价接口 ==========
 
       // 获取所有可用日期列表
-      if (path === "/api/oil-prices/dates" && (method === "GET" || method === "POST")) {
+      if (path === "/api/oil-prices/dates" && method === "POST") {
         const dates = await queryOilDates(env.HOLIDAYS, env.OIL_PRICES_DB);
         return json(origin, { dates });
       }
 
       // 查询油价数据
-      if (path === "/api/oil-prices" && (method === "GET" || method === "POST")) {
-        let date: string | undefined;
-        let city: string | undefined;
-        let page: number | undefined;
-        let pageSize: number | undefined;
-
-        if (method === "POST") {
-          const body = await request.json<{
+      if (path === "/api/oil-prices" && method === "POST") {
+        let body: { date?: string; city?: string; page?: number; pageSize?: number } = {};
+        try {
+          body = await request.json<{
             date?: string;
             city?: string;
             page?: number;
             pageSize?: number;
           }>();
-          date = body.date;
-          city = body.city;
-          page = body.page;
-          pageSize = body.pageSize;
-        } else {
-          date = url.searchParams.get("date") || undefined;
-          city = url.searchParams.get("city") || undefined;
-          const p = url.searchParams.get("page");
-          const ps = url.searchParams.get("pageSize");
-          page = p ? Number(p) : undefined;
-          pageSize = ps ? Number(ps) : undefined;
+        } catch {
+          // body 为空或非法 JSON 时使用默认值
         }
 
-        const result = await queryOilPrices(env.OIL_PRICES_DB, { date, city, page, pageSize });
+        const result = await queryOilPrices(env.OIL_PRICES_DB, {
+          date: body.date,
+          city: body.city,
+          page: body.page,
+          pageSize: body.pageSize,
+        });
         return json(origin, result);
       }
 
@@ -129,7 +121,7 @@ export default {
 function buildCorsHeaders(origin: string): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
   if (origin) {

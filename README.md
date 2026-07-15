@@ -48,7 +48,7 @@ echo "https://new-domain.example.com,https://another.com" | npx wrangler secret 
 ### 根路径
 
 ```
-GET /
+POST /
 ```
 
 返回服务信息：
@@ -75,7 +75,7 @@ Content-Type: application/json
 #### 获取可用日期列表
 
 ```
-GET /api/oil-prices/dates
+POST /api/oil-prices/dates
 ```
 
 返回所有已收录的油价日期（按时间倒序）：
@@ -85,12 +85,6 @@ GET /api/oil-prices/dates
 ```
 
 #### 查询油价数据
-
-```
-GET /api/oil-prices?date=2026-06-19&city=北京&page=1&pageSize=50
-```
-
-或：
 
 ```
 POST /api/oil-prices
