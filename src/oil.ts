@@ -198,10 +198,10 @@ export async function initOilPricesTable(db: D1Database): Promise<void> {
       qe89 REAL,
       created_at TEXT DEFAULT (datetime('now')),
       PRIMARY KEY (dim_id, dim_date)
-    );
-    CREATE INDEX IF NOT EXISTS idx_oil_prices_date ON oil_prices(dim_date);
-    CREATE INDEX IF NOT EXISTS idx_oil_prices_city ON oil_prices(city_name);
+    )
   `);
+  await db.exec(`CREATE INDEX IF NOT EXISTS idx_oil_prices_date ON oil_prices(dim_date)`);
+  await db.exec(`CREATE INDEX IF NOT EXISTS idx_oil_prices_city ON oil_prices(city_name)`);
   console.log("oil_prices table initialized");
 }
 
