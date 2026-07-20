@@ -29,6 +29,17 @@ GITHUB_RAW_BASE = "https://raw.githubusercontent.com/NateScarlet/holiday-cn/mast
 # ADMIN_KEY 通过 Secret 设置，用于手动触发同步
 # 首次部署后运行: echo "your-admin-key" | npx wrangler secret put ADMIN_KEY
 
-[observability.logs]
+[observability]
 enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
 invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
