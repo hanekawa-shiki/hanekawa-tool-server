@@ -2,12 +2,26 @@
   "name": "hanekawa-tool-server",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@12.15.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.0.0",
+      "onFail": "ignore"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.0.0",
+      "onFail": "download"
+    }
+  },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "kv:create": "wrangler kv namespace create HOLIDAYS",
     "kv:list": "wrangler kv namespace list",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261022.1",
